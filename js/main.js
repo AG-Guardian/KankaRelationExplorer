@@ -2,6 +2,7 @@ const CAMPAIGN_ID = '15519'
 const REQUEST_PATH = 'https://kanka.io/api/1.0/campaigns/' + CAMPAIGN_ID
 const REDIRECT_PATH = 'https://kanka.io/en-US/campaign/' + CAMPAIGN_ID + '/characters/'
 const TOKEN = 'token'
+
 var cy = cytoscape({
   container: document.getElementById('cy'), // container to render in
 
