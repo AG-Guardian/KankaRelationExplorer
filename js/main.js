@@ -3,12 +3,9 @@ const REQUEST_PATH = 'https://kanka.io/api/1.0/campaigns/' + CAMPAIGN_ID
 const REDIRECT_PATH = 'https://kanka.io/en-US/campaign/' + CAMPAIGN_ID
 const TOKEN = 'token'
 
-// init the graph and set default styles
+// init the graph and set default style
 var cy = cytoscape({
   container: document.getElementById('cy'), // container to render in
-
-  elements: [],
-
   style: cytoscape.stylesheet()
     .selector('node')
     .css({
@@ -38,12 +35,7 @@ var cy = cytoscape({
       'text-border-color': '#fff',
       'text-border-width': 3,
       'text-border-opacity': 1
-    }),
-
-  layout: {
-    name: 'grid',
-    rows: 1
-  }
+    })
 });
 
 // on load, make an ajax request for campaign characters
@@ -64,47 +56,46 @@ function setHeader(xhr) {
 
 function buildGraph(json) {
   let elementList = []
-  let characters = []
 
   // for each entity from the ajax call, create a node
   for (entity in json.data) {
-    if (json.data[entity].relations.length > 0) {
+    let element = {
+      group: 'nodes',
+      data: {
+        id: json.data[entity].entity_id,
+        name: json.data[entity].name,
+        image: json.data[entity].image_full,
+        char_id: json.data[entity].id
+      }
+    }
+    elementList.push(element)
+
+    // for each relation an entity has, create an edge
+    for (relation in json.data[entity].relations) {
       let element = {
-        group: 'nodes',
+        group: 'edges',
         data: {
-          id: json.data[entity].entity_id,
-          name: json.data[entity].name,
-          image: json.data[entity].image_full,
-          char_id: json.data[entity].id
+          source: json.data[entity].relations[relation].owner_id,
+          target: json.data[entity].relations[relation].target_id,
+          name: json.data[entity].relations[relation].relation,
+          color: json.data[entity].relations[relation].colour,
+          attitude: json.data[entity].relations[relation].attitude,
         }
+      }
+      // if the relation does not have a color, use the default
+      if (!element.data.color) {
+        element.data.color = '#777'
       }
       elementList.push(element)
-
-      // add the character ID to the list to strip non-character relations later. This is temporary.
-      characters.push(json.data[entity].entity_id)
-
-      // for each relation an entity has, create an edge
-      for (relation in json.data[entity].relations) {
-        let element = {
-          group: 'edges',
-          data: {
-            source: json.data[entity].relations[relation].owner_id,
-            target: json.data[entity].relations[relation].target_id,
-            name: json.data[entity].relations[relation].relation,
-            color: json.data[entity].relations[relation].colour,
-            attitude: json.data[entity].relations[relation].attitude,
-          }
-        }
-        // if the relation does not have a color, use the default
-        if (!element.data.color) {
-          element.data.color = '#777'
-        }
-        elementList.push(element)
-      }
     }
   }
 
   // Strip out non-character relations. Temporary workaround to keep the code simple.
+  // If I was using all entity types this block would be unnecessary
+  let characters = []
+  for (entity in json.data) {
+    characters.push(json.data[entity].entity_id)
+  }
   for (var i = 0; i < elementList.length; i++) {
     if (elementList[i].group == 'edges' && !characters.includes(elementList[i].data.target)) {
       elementList.splice(i, 1);
@@ -112,16 +103,20 @@ function buildGraph(json) {
     }
   }
 
-  // add all of the elements (nodes and edges) to the graph
+  // add all of the elements (nodes and edges) to the graph. Remove orphans to keep the graph clean.
   cy.add(elementList)
-
-  // use an automatic layout
-  var layout = cy.elements().layout({
-    name: 'cose-bilkent',
-    padding: 80,
-    idealEdgeLength: 130,
+  cy.nodes().forEach(function(node){
+    if (node.connectedEdges().length == 0) {
+      cy.remove(node)
+    }
   })
 
+  // use an automatic layout. fcose is decently fast and looks nice
+  var layout = cy.elements().layout({
+    name: 'fcose',
+    idealEdgeLength: 130,
+    nodeDimensionsIncludeLabels: true,
+  })
   layout.run()
 
   // Node (character) events
