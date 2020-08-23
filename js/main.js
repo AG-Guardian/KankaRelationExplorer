@@ -1,8 +1,9 @@
 const CAMPAIGN_ID = '15519'
 const REQUEST_PATH = 'https://kanka.io/api/1.0/campaigns/' + CAMPAIGN_ID
-const REDIRECT_PATH = 'https://kanka.io/en-US/campaign/' + CAMPAIGN_ID + '/characters/'
+const REDIRECT_PATH = 'https://kanka.io/en-US/campaign/' + CAMPAIGN_ID
 const TOKEN = 'token'
 
+// init the graph and set default styles
 var cy = cytoscape({
   container: document.getElementById('cy'), // container to render in
 
@@ -16,20 +17,27 @@ var cy = cytoscape({
       'height': 80,
       'width': 80,
       'background-fit': 'cover',
-      'border-color': '#000',
+      'border-color': '#777',
       'border-width': 3,
-      'border-opacity': 0.5,
       'text-margin-y': '-8px',
-      'text-outline-color': '#ffffff',
-      'text-outline-width': '8px',
+      'text-background-opacity': 1,
+      'text-background-color': '#fff',
+      'text-border-color': '#fff',
+      'text-border-width': 3,
+      'text-border-opacity': 1
     })
     .selector('edge')
     .css({
-      'label': 'data(name)',
-      'source-endpoint': 'outside-to-node-or-label',
-      'target-endpoint': 'outside-to-node-or-label',
-      'text-outline-color': '#ffffff',
-      'text-outline-width': '8px',
+      'line-color': 'data(color)',
+      'curve-style': 'bezier',
+      'control-point-step-size': 40,
+      'target-arrow-shape': 'triangle-backcurve',
+      'target-arrow-color': 'data(color)',
+      'text-background-opacity': 1,
+      'text-background-color': '#fff',
+      'text-border-color': '#fff',
+      'text-border-width': 3,
+      'text-border-opacity': 1
     }),
 
   layout: {
@@ -38,12 +46,13 @@ var cy = cytoscape({
   }
 });
 
+// on load, make an ajax request for campaign characters
 $(document).ready(function() {
   $.ajax({
     url: REQUEST_PATH + '/characters?related=1',
     type: 'GET',
     dataType: 'json',
-    success: buildElements,
+    success: buildGraph,
     beforeSend: setHeader
   });
 });
@@ -53,9 +62,10 @@ function setHeader(xhr) {
   xhr.setRequestHeader('accept', 'application/json');
 }
 
-function buildElements(json) {
+function buildGraph(json) {
   let elementList = [];
 
+  // for each entity from the ajax call, create a node
   for (entity in json.data) {
     if (json.data[entity].relations.length > 0) {
       let element = {
@@ -69,23 +79,31 @@ function buildElements(json) {
       }
       elementList.push(element)
 
+      // for each relation an entity has, create an edge
       for (relation in json.data[entity].relations) {
         let element = {
           group: 'edges',
           data: {
-            id: json.data[entity].relations[relation].owner_id + json.data[entity].relations[relation].target_id,
             source: json.data[entity].relations[relation].owner_id,
             target: json.data[entity].relations[relation].target_id,
             name: json.data[entity].relations[relation].relation,
+            color: json.data[entity].relations[relation].colour,
+            attitude: json.data[entity].relations[relation].attitude,
           }
+        }
+        // if the relation does not have a color, use the default
+        if (!element.data.color) {
+          element.data.color = '#777'
         }
         elementList.push(element)
       }
     }
   }
 
+  // add all of the elements (nodes and edges) to the graph
   cy.add(elementList)
 
+  // use an automatic layout
   var layout = cy.elements().layout({
     name: 'cose-bilkent',
     padding: 80,
@@ -94,8 +112,55 @@ function buildElements(json) {
 
   layout.run();
 
+  // Node (character) events
   cy.nodes().on('click', function(e){
     entity = cy.getElementById(e.target.id());
-    window.location.href = REDIRECT_PATH + entity._private.data.char_id;
+    window.location.href = REDIRECT_PATH + '/characters/' + entity._private.data.char_id;
   });
+
+  cy.nodes().on('mouseover', function(e){
+    entity = cy.getElementById(e.target.id());
+    entity.style('overlay-opacity', 0.1);
+  });
+
+  cy.nodes().on('mouseout', function(e){
+    entity.style('overlay-opacity', 0);
+  });
+
+  // Edge (relation) events
+  cy.edges().on('click', function(e){
+    relation = cy.getElementById(e.target.id());
+    window.location.href = REDIRECT_PATH + '/entities/' + relation._private.data.source + '/relations';
+  });
+
+  cy.edges().on('mouseover', function(e){
+    relation = cy.getElementById(e.target.id());
+    relation.style('label', relation._private.data.name);
+    relation.style('overlay-opacity', 0.1);
+  });
+
+  cy.edges().on('mouseout', function(e){
+    relation.style('label', '');
+    relation.style('overlay-opacity', 0);
+  });
+
+  // wait until images load to display graph
+  displayOnLoad();
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function displayOnLoad() {
+  let loading = true;
+  while (loading) {
+    if (cy.elements('node:backgrounding').length == 0) {
+      loading = false;
+    } else {
+      await sleep(300);
+    }
+  }
+  document.getElementById("spinner").style.display = 'none';
+  document.getElementById("cy").style.display = 'block';
 }
