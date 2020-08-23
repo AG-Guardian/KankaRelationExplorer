@@ -58,12 +58,13 @@ $(document).ready(function() {
 });
 
 function setHeader(xhr) {
-  xhr.setRequestHeader('authorization', 'Bearer ' + TOKEN);
-  xhr.setRequestHeader('accept', 'application/json');
+  xhr.setRequestHeader('authorization', 'Bearer ' + TOKEN)
+  xhr.setRequestHeader('accept', 'application/json')
 }
 
 function buildGraph(json) {
-  let elementList = [];
+  let elementList = []
+  let characters = []
 
   // for each entity from the ajax call, create a node
   for (entity in json.data) {
@@ -78,6 +79,9 @@ function buildGraph(json) {
         }
       }
       elementList.push(element)
+
+      // add the character ID to the list to strip non-character relations later. This is temporary.
+      characters.push(json.data[entity].entity_id)
 
       // for each relation an entity has, create an edge
       for (relation in json.data[entity].relations) {
@@ -100,6 +104,14 @@ function buildGraph(json) {
     }
   }
 
+  // Strip out non-character relations. Temporary workaround to keep the code simple.
+  for (var i = 0; i < elementList.length; i++) {
+    if (elementList[i].group == 'edges' && !characters.includes(elementList[i].data.target)) {
+      elementList.splice(i, 1);
+      i--;
+    }
+  }
+
   // add all of the elements (nodes and edges) to the graph
   cy.add(elementList)
 
@@ -108,59 +120,59 @@ function buildGraph(json) {
     name: 'cose-bilkent',
     padding: 80,
     idealEdgeLength: 130,
-  });
+  })
 
-  layout.run();
+  layout.run()
 
   // Node (character) events
   cy.nodes().on('click', function(e){
-    entity = cy.getElementById(e.target.id());
-    window.location.href = REDIRECT_PATH + '/characters/' + entity._private.data.char_id;
-  });
+    entity = cy.getElementById(e.target.id())
+    window.location.href = REDIRECT_PATH + '/characters/' + entity._private.data.char_id
+  })
 
   cy.nodes().on('mouseover', function(e){
-    entity = cy.getElementById(e.target.id());
-    entity.style('overlay-opacity', 0.1);
-  });
+    entity = cy.getElementById(e.target.id())
+    entity.style('overlay-opacity', 0.1)
+  })
 
   cy.nodes().on('mouseout', function(e){
-    entity.style('overlay-opacity', 0);
-  });
+    entity.style('overlay-opacity', 0)
+  })
 
   // Edge (relation) events
   cy.edges().on('click', function(e){
-    relation = cy.getElementById(e.target.id());
-    window.location.href = REDIRECT_PATH + '/entities/' + relation._private.data.source + '/relations';
-  });
+    relation = cy.getElementById(e.target.id())
+    window.location.href = REDIRECT_PATH + '/entities/' + relation._private.data.source + '/relations'
+  })
 
   cy.edges().on('mouseover', function(e){
     relation = cy.getElementById(e.target.id());
     relation.style('label', relation._private.data.name);
-    relation.style('overlay-opacity', 0.1);
-  });
+    relation.style('overlay-opacity', 0.1)
+  })
 
   cy.edges().on('mouseout', function(e){
-    relation.style('label', '');
-    relation.style('overlay-opacity', 0);
-  });
+    relation.style('label', '')
+    relation.style('overlay-opacity', 0)
+  })
 
   // wait until images load to display graph
-  displayOnLoad();
+  displayOnLoad()
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 async function displayOnLoad() {
-  let loading = true;
+  let loading = true
   while (loading) {
     if (cy.elements('node:backgrounding').length == 0) {
-      loading = false;
+      loading = false
     } else {
-      await sleep(300);
+      await sleep(300)
     }
   }
-  document.getElementById("spinner").style.display = 'none';
-  document.getElementById("cy").style.display = 'block';
+  document.getElementById("spinner").style.display = 'none'
+  document.getElementById("cy").style.display = 'block'
 }
