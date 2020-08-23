@@ -1,7 +1,13 @@
-const CAMPAIGN_ID = '15519'
+const CAMPAIGN_ID = 'campaign'
+const TOKEN = 'token'
+
 const REQUEST_PATH = 'https://kanka.io/api/1.0/campaigns/' + CAMPAIGN_ID
 const REDIRECT_PATH = 'https://kanka.io/en-US/campaign/' + CAMPAIGN_ID
-const TOKEN = 'token'
+
+const entityTypes = ['characters', 'locations', 'families', 'organisations', 'items', 'notes', 'events', 'calendars', 'races', 'quests', 'journals', 'abilities', 'tags']
+const elementList = []
+
+let hasNextPage
 
 // init the graph and set default style
 var cy = cytoscape({
@@ -28,7 +34,7 @@ var cy = cytoscape({
       'line-color': 'data(color)',
       'curve-style': 'bezier',
       'control-point-step-size': 40,
-      'target-arrow-shape': 'triangle-backcurve',
+      'target-arrow-shape': 'triangle',
       'target-arrow-color': 'data(color)',
       'width': 'data(attitude)',
       'text-background-opacity': 1,
@@ -39,25 +45,40 @@ var cy = cytoscape({
     })
 });
 
-// on load, make an ajax request for campaign characters
+// on load, make an ajax requests for campaign entities
 $(document).ready(function() {
-  $.ajax({
-    url: REQUEST_PATH + '/characters?related=1',
+  getEntities()
+});
+
+async function getEntities() {
+  for (i in entityTypes) {
+    hasNextPage = true
+    let page = 1
+
+    while(hasNextPage) {
+      await getEntityByType(entityTypes[i], page)
+      page++
+    }
+  }
+  buildGraph(elementList)
+}
+
+function getEntityByType(entityType, page) {
+  return $.ajax({
+    url: REQUEST_PATH + '/' + entityType + '?page=' + page + '&related=1',
     type: 'GET',
     dataType: 'json',
-    success: buildGraph,
+    success: getElements,
     beforeSend: setHeader
   });
-});
+}
 
 function setHeader(xhr) {
   xhr.setRequestHeader('authorization', 'Bearer ' + TOKEN)
   xhr.setRequestHeader('accept', 'application/json')
 }
 
-function buildGraph(json) {
-  let elementList = []
-
+function getElements(json) {
   // for each entity from the ajax call, create a node
   for (entity in json.data) {
     let element = {
@@ -66,7 +87,7 @@ function buildGraph(json) {
         id: json.data[entity].entity_id,
         name: json.data[entity].name,
         image: json.data[entity].image_full,
-        char_id: json.data[entity].id
+        type_id: json.data[entity].id
       }
     }
     elementList.push(element)
@@ -95,20 +116,15 @@ function buildGraph(json) {
     }
   }
 
-  // Strip out non-character relations. Temporary workaround to keep the code simple.
-  // If I was using all entity types this block would be unnecessary
-  let characters = []
-  for (entity in json.data) {
-    characters.push(json.data[entity].entity_id)
+  // deal with pagination
+  if (!json.links.next) {
+    hasNextPage = false
   }
-  for (var i = 0; i < elementList.length; i++) {
-    if (elementList[i].group == 'edges' && !characters.includes(elementList[i].data.target)) {
-      elementList.splice(i, 1);
-      i--;
-    }
-  }
+}
 
+function buildGraph(elementList) {
   // add all of the elements (nodes and edges) to the graph. Remove orphans to keep the graph clean.
+
   cy.add(elementList)
   cy.nodes().forEach(function(node){
     if (node.connectedEdges().length == 0) {
@@ -127,7 +143,7 @@ function buildGraph(json) {
   // Node (character) events
   cy.nodes().on('click', function(e){
     entity = cy.getElementById(e.target.id())
-    window.location.href = REDIRECT_PATH + '/characters/' + entity._private.data.char_id
+    window.location.href = REDIRECT_PATH + '/characters/' + entity._private.data.type_id
   })
 
   cy.nodes().on('mouseover', function(e){
