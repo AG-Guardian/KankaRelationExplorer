@@ -43,12 +43,12 @@ var cy = cytoscape({
       'text-border-width': 3,
       'text-border-opacity': 1
     })
-});
+})
 
 // on load, make an ajax requests for campaign entities
 $(document).ready(function() {
   getEntities()
-});
+})
 
 async function getEntities() {
   for (i in entityTypes) {
@@ -64,13 +64,14 @@ async function getEntities() {
 }
 
 function getEntityByType(entityType, page) {
+  console.log('getting ' + entityType + ' page ' + page)
   return $.ajax({
     url: REQUEST_PATH + '/' + entityType + '?page=' + page + '&related=1',
     type: 'GET',
     dataType: 'json',
     success: getElements,
     beforeSend: setHeader
-  });
+  })
 }
 
 function setHeader(xhr) {
@@ -143,7 +144,7 @@ function buildGraph(elementList) {
   // Node (character) events
   cy.nodes().on('click', function(e){
     entity = cy.getElementById(e.target.id())
-    window.location.href = REDIRECT_PATH + '/characters/' + entity._private.data.type_id
+    window.open(REDIRECT_PATH + '/characters/' + entity._private.data.type_id, '_blank')
   })
 
   cy.nodes().on('mouseover', function(e){
@@ -158,12 +159,12 @@ function buildGraph(elementList) {
   // Edge (relation) events
   cy.edges().on('click', function(e){
     relation = cy.getElementById(e.target.id())
-    window.location.href = REDIRECT_PATH + '/entities/' + relation._private.data.source + '/relations'
+    window.open(REDIRECT_PATH + '/entities/' + relation._private.data.source + '/relations', '_blank')
   })
 
   cy.edges().on('mouseover', function(e){
-    relation = cy.getElementById(e.target.id());
-    relation.style('label', relation._private.data.name);
+    relation = cy.getElementById(e.target.id())
+    relation.style('label', relation._private.data.name)
     relation.style('overlay-opacity', 0.1)
   })
 
