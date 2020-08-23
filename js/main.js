@@ -30,6 +30,7 @@ var cy = cytoscape({
       'control-point-step-size': 40,
       'target-arrow-shape': 'triangle-backcurve',
       'target-arrow-color': 'data(color)',
+      'width': 'data(attitude)',
       'text-background-opacity': 1,
       'text-background-color': '#fff',
       'text-border-color': '#fff',
@@ -86,6 +87,10 @@ function buildGraph(json) {
       if (!element.data.color) {
         element.data.color = '#777'
       }
+      if (!element.data.attitude) {
+        element.data.attitude = 0
+      }
+      element.data.attitude = (((element.data.attitude + 100) / 100) * 2) + 2
       elementList.push(element)
     }
   }
