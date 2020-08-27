@@ -14,6 +14,15 @@
   transform: translate(-50%, -50%);
 }
 
+#loading-text {
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 50px);
+}
+
 #spinner {
   border: 8px solid #f3f3f3; /* Light grey */
   border-top: 8px solid #3498db; /* Blue */
@@ -21,6 +30,7 @@
   width: 48px;
   height: 48px;
   animation: spin 2s linear infinite;
+  display: none;
 }
 
 @keyframes spin {
@@ -28,3 +38,97 @@
   100% { transform: rotate(360deg); }
 }
 
+input {
+  display:block;
+}
+
+input.text {
+  margin-bottom:12px;
+  width:95%;
+  padding: .4em;
+}
+
+fieldset {
+  padding:0;
+  border:0;
+  margin-top:25px;
+}
+
+h1 {
+  font-size: 1.2em;
+  margin: .6em 0;
+}
+
+.ui-dialog .ui-state-error {
+  padding: .3em;
+}
+
+.validateTips {
+  border: 1px solid transparent;
+  padding: 0.3em;
+}
+
+label {
+  display: block;
+  margin: none;
+}
+
+.overflow {
+  height: 200px;
+}
+
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}
+
+#orphan-form, #attitude-form, #color-form, #relation-form {
+  display: none;
+}
+
+#red, #green, #blue, #attitude {
+  float: left;
+  clear: left;
+  width: 300px;
+  margin: 15px;
+}
+
+#swatch {
+  width: 110px;
+  height: 110px;
+  margin-top: 10px;
+  margin-left: 375px;
+  background-image: none;
+}
+
+#red .ui-slider-range {
+  background: #ef2929;
+}
+
+#red .ui-slider-handle {
+  border-color: #ef2929;
+}
+
+#green .ui-slider-range {
+  background: #8ae234;
+}
+
+#green .ui-slider-handle {
+  border-color: #8ae234;
+}
+
+#blue .ui-slider-range {
+  background: #729fcf;
+}
+
+#blue .ui-slider-handle {
+  border-color: #729fcf;
+}
+
+#red-handle, #green-handle, #blue-handle, #attitude-handle {
+  width: 3em;
+  height: 1.6em;
+  top: 50%;
+  margin-top: -.8em;
+  text-align: center;
+  line-height: 1.6em;
+}

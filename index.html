@@ -4,20 +4,77 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.css" type="text/css"/>
+    <link rel="stylesheet" href="css/cytoscape-context-menus.css" type="text/css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" type="text/css"/>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
-    <script src="js/cytoscape.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="js/vendor/cytoscape.min.js"></script>
     <script src="https://unpkg.com/layout-base/layout-base.js"></script>
     <script src="https://unpkg.com/cose-base/cose-base.js"></script>
-    <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
+    <script src="js/vendor/cytoscape-cose-bilkent.js"></script>
+    <script src="js/vendor/cytoscape-context-menus.js"></script>
+    <script src="js/vendor/cytoscape-dblclick.js"></script>
   </head>
 
   <body>
     <div class="center">
+      <div id="login-form" title="Login">
+        <p id="login-tips" class="validateTips">All form fields are required.</p>
+        <form>
+          <fieldset>
+            <label for="campaign">Campaign ID</label>
+            <input type="number" name="campaign" id="campaign" value="15519" class="text ui-widget-content ui-corner-all">
+            <label for="token">API Token</label>
+            <input type="password" name="token" id="token" value="xxxxxxx" class="text ui-widget-content ui-corner-all">
+            <!-- Allow form submission with keyboard without duplicating the dialog button -->
+            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+          </fieldset>
+        </form>
+      </div>
+      <div id="orphan-form" title="Orphans">
+        <form>
+          <fieldset>
+            <label for="orphans">Select an Entity</label>
+            <select name="orphans" id="orphans">
+              <!-- orphans will be added here -->
+            </select>
+          </fieldset>
+        </form>
+      </div>
+      <div id="color-form" class="ui-widget-content" title="Pick a Color" style="border:0;">
+        <div id="red">
+          <div id="red-handle" class="ui-slider-handle"></div>
+        </div>
+        <div id="green">
+          <div id="green-handle" class="ui-slider-handle"></div>
+        </div>
+        <div id="blue">
+          <div id="blue-handle" class="ui-slider-handle"></div>
+        </div>
+        <div id="swatch" class="ui-widget-content ui-corner-all"></div>
+      </div>
+      <div id="attitude-form" class="ui-widget-content" title="Choose an Attitude" style="border:0;">
+        <div id="attitude">
+          <div id="attitude-handle" class="ui-slider-handle"></div>
+        </div>
+      </div>
+      <div id="relation-form" title="New Relation">
+        <form>
+          <fieldset>
+            <label for="relation">Relation</label>
+            <input type="text" name="relation" id="relation" value="Friend" class="text ui-widget-content ui-corner-all">
+            <!-- Allow form submission with keyboard without duplicating the dialog button -->
+            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+          </fieldset>
+        </form>
+      </div>
+      <div id="loading-text"></div>
       <div id="spinner"></div>
     </div>
-    <div id="cy"></div>
+    <div id="cy" class="row cy"></div>
     <script src="js/main.js"></script>
   </body>
 </html>
