@@ -1,3 +1,26 @@
+.btn {
+  font-family: Arial;
+  font-size: 1em;
+  line-height: 1.4;
+  border-radius: 6px;
+  background-color: #176598;
+  color: #fff;
+  padding: 8px;
+  text-decoration: none;
+  margin-right: 10px;
+}
+
+.btn:hover {
+  background-color: #2295e0;
+}
+
+.header {
+  margin: 10px;
+  position: absolute;
+  text-align: right;
+  z-index: 9999;
+}
+
 #cy {
   position: absolute;
   top: 0;
