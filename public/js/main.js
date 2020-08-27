@@ -381,8 +381,9 @@ function init() {
         coreAsWell: true,
         onClickFunction: function (event) {
           cy.elements().forEach(function(element) {
-            if (element.isEdge() || element.connectedEdges().length > 0);
-            element.show();
+            if (element.isEdge() || element.connectedEdges().length > 0) {
+              element.show();
+            }
           });
         },
         disabled: false,
