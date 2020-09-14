@@ -101,12 +101,13 @@ function init() {
       'height': 80,
       'width': 80,
       'background-fit': 'cover',
-      'border-color': DEFAULT_COLOR,
+      'border-color': $('#cy').parent().css('color'),
       'border-width': 3,
       'text-margin-y': '-8px',
+      'font-color': $('#cy').parent().css('font-color'),
       'text-background-opacity': 1,
-      'text-background-color': '#ffffff',
-      'text-border-color': '#ffffff',
+      'text-background-color': $('#cy').parent().css('background-color'),
+      'text-border-color': $('#cy').parent().css('background-color'),
       'text-border-width': 3,
       'text-border-opacity': 1
     })
@@ -118,12 +119,14 @@ function init() {
       'target-arrow-shape': 'triangle',
       'target-arrow-color': 'data(color)',
       'width': 'data(attitude)',
+      'font-color': $('#cy').parent().css('font-color'),
       'text-background-opacity': 1,
-      'text-background-color': '#ffffff',
-      'text-border-color': '#ffffff',
+      'text-background-color': $('#cy').parent().css('background-color'),
+      'text-border-color': $('#cy').parent().css('background-color'),
       'text-border-width': 3,
       'text-border-opacity': 1
     }),
+    wheelSensitivity: 0.3,
   });
 
   // init the context menus and set up their functions
@@ -446,6 +449,9 @@ function init() {
       },
     ]
   });
+
+  // enable pan/zoom buttons
+  cy.panzoom();
 
   // enable double-click event
   cy.dblclick();

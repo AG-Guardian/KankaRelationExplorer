@@ -18,6 +18,7 @@
   position: absolute;
   text-align: right;
   z-index: 9999;
+  right: 0;
 }
 
 #cy {
