@@ -1,6 +1,8 @@
 const entityTypes = ['characters', 'locations', 'families', 'organisations', 'items', 'notes', 'events', 'calendars', 'races', 'quests', 'journals', 'abilities', 'tags'];
 const elementList = [];
-const DEFAULT_COLOR = '#777777';
+
+const MAX_ZOOM = 2;
+const MIN_ZOOM = 0.3;
 
 let CAMPAIGN_ID;
 let TOKEN;
@@ -104,7 +106,7 @@ function init() {
       'border-color': $('#cy').parent().css('color'),
       'border-width': 3,
       'text-margin-y': '-8px',
-      'font-color': $('#cy').parent().css('font-color'),
+      'color': $('#cy').parent().css('color'),
       'text-background-opacity': 1,
       'text-background-color': $('#cy').parent().css('background-color'),
       'text-border-color': $('#cy').parent().css('background-color'),
@@ -119,7 +121,7 @@ function init() {
       'target-arrow-shape': 'triangle',
       'target-arrow-color': 'data(color)',
       'width': 'data(attitude)',
-      'font-color': $('#cy').parent().css('font-color'),
+      'color': $('#cy').parent().css('color'),
       'text-background-opacity': 1,
       'text-background-color': $('#cy').parent().css('background-color'),
       'text-border-color': $('#cy').parent().css('background-color'),
@@ -127,6 +129,8 @@ function init() {
       'text-border-opacity': 1
     }),
     wheelSensitivity: 0.3,
+    maxZoom: 2,
+    minZoom: 0.3,
   });
 
   // init the context menus and set up their functions
@@ -451,7 +455,10 @@ function init() {
   });
 
   // enable pan/zoom buttons
-  cy.panzoom();
+  cy.panzoom({
+    maxZoom: 2,
+    minZoom: 0.3,
+  });
 
   // enable double-click event
   cy.dblclick();
@@ -525,7 +532,7 @@ function getElements(json) {
       };
       // if the relation does not have a color, use the default
       if (!element.data.color) {
-        element.data.color = DEFAULT_COLOR;
+        element.data.color = $('#cy').parent().css('color');
       }
       if (!element.data.attitude) {
         element.data.attitude = 0;
@@ -715,7 +722,7 @@ function handleAddRelation() {
               source: source._private.data.id,
               target: target._private.data.id,
               name: relationName,
-              color: DEFAULT_COLOR,
+              color: $('#cy').parent().css('color'),
               attitude: getWidthFromAttitude(0),
             }
           };
